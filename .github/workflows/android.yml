@@ -28,10 +28,10 @@ jobs:
 
       - name: Build APK
         working-directory: android-project
-        run: gradle assembleDebug
+        
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: android-project/app/build/outputs/apk/debug/*.apk
+      path: app/build/outputs/apk/debug/*.apk
