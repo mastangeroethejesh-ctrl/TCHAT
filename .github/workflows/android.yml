@@ -21,16 +21,29 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Set up Gradle
+      - name: Install Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
 
+      - name: Extract Android project
+        run: |
+          mkdir android-project
+          unzip -o *.zip -d android-project
+
+      - name: Find Android project
+        run: |
+          find android-project -name settings.gradle.kts -o -name settings.gradle
+
       - name: Build APK
-        run: gradle assembleDebug
+        run: |
+          PROJECT=$(dirname "$(find android-project -name settings.gradle.kts -o -name settings.gradle | head -1)")
+          echo "Project folder: $PROJECT"
+          cd "$PROJECT"
+          gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: android-project/**/app/build/outputs/apk/debug/*.apk
