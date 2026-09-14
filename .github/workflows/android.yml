@@ -28,22 +28,28 @@ jobs:
 
       - name: Extract Android project
         run: |
-          mkdir android-project
+          mkdir -p android-project
           unzip -o *.zip -d android-project
 
-      - name: Find Android project
+      - name: Create debug keystore
+        working-directory: android-project
         run: |
-          find android-project -name settings.gradle.kts -o -name settings.gradle
+          keytool -genkeypair -v \
+            -keystore debug.keystore \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
 
       - name: Build APK
-        run: |
-          PROJECT=$(dirname "$(find android-project -name settings.gradle.kts -o -name settings.gradle | head -1)")
-          echo "Project folder: $PROJECT"
-          cd "$PROJECT"
-          gradle assembleDebug
+        working-directory: android-project
+        run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: android-project/**/app/build/outputs/apk/debug/*.apk
+          path: android-project/app/build/outputs/apk/debug/*.apk
